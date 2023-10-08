@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAutomation", "ExcelAutomation\ExcelAutomation.csproj", "{3CE0FDB9-39AB-4096-9668-D222A9AF70A9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAutomation.Domain", "ExcelAutomation.Domain\ExcelAutomation.Domain.csproj", "{9800A9EF-A4CF-4010-9C54-91F35E44A5DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAutomation.Shared", "ExcelAutomation.Shared\ExcelAutomation.Shared.csproj", "{322BFF36-7244-4371-A09E-451F786B643E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAutomation.Shared", "ExcelAutomation.Shared\ExcelAutomation.Shared.csproj", "{322BFF36-7244-4371-A09E-451F786B643E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAutomation", "ExcelAutomation.V2\ExcelAutomation.csproj", "{2DB39581-CB5E-471F-B58F-3BA908FB00A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAutomation.UseCases", "ExcelAutomation.Application\ExcelAutomation.UseCases.csproj", "{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3CE0FDB9-39AB-4096-9668-D222A9AF70A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3CE0FDB9-39AB-4096-9668-D222A9AF70A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3CE0FDB9-39AB-4096-9668-D222A9AF70A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3CE0FDB9-39AB-4096-9668-D222A9AF70A9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9800A9EF-A4CF-4010-9C54-91F35E44A5DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9800A9EF-A4CF-4010-9C54-91F35E44A5DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9800A9EF-A4CF-4010-9C54-91F35E44A5DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +25,14 @@ Global
 		{322BFF36-7244-4371-A09E-451F786B643E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{322BFF36-7244-4371-A09E-451F786B643E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{322BFF36-7244-4371-A09E-451F786B643E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DB39581-CB5E-471F-B58F-3BA908FB00A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DB39581-CB5E-471F-B58F-3BA908FB00A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DB39581-CB5E-471F-B58F-3BA908FB00A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DB39581-CB5E-471F-B58F-3BA908FB00A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
