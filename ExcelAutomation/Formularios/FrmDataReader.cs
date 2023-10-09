@@ -1,6 +1,6 @@
 ﻿using ExcelAutomation.Domain.Models;
 using ExcelAutomation.Layouts;
-using ExcelAutomation.UseCases.Helpers;
+using ExcelAutomation.UseCases.Handler;
 using MaterialSkin.Controls;
 using MiniExcelLibs;
 using System.Data;
@@ -15,7 +15,7 @@ namespace ExcelAutomation.Formularios
         private readonly int[] larguraColunas = { 150, 200, 100, 150, 200, 150 };
         private int __qtdArquivosLidos;
         private int __qtdArquivosSelecionados;
-        private ExcelHelper __excelHelper;
+        private ExcelHandler __excelHandler;
 
         private Stopwatch stopWatch;
         public FrmDataReader()
@@ -35,6 +35,20 @@ namespace ExcelAutomation.Formularios
             lblAguardando.Visible = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                if (!openFileDialog.FileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase) || !openFileDialog.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show($"Tipo de arquivo inválido. Selecione apenas arquivos .xls ou .xlsx");
+                    lblAguardando.Visible = false;
+                    return;
+                }
+
+                if (openFileDialog.FileNames.Length > 12000)
+                {
+                    MessageBox.Show($"Não é possível selecionar mais do que 12000 arquivos");
+                    lblAguardando.Visible = false;
+                    return;
+                }
+
                 __qtdArquivosSelecionados = openFileDialog.FileNames.Length;
                 pgbImportacao.Maximum = __qtdArquivosSelecionados;
                 pgbImportacao.Value = 0;
@@ -45,7 +59,7 @@ namespace ExcelAutomation.Formularios
                 {
                     btnImportar.Enabled = false;
 
-                    __excelHelper = new ExcelHelper();
+                    __excelHandler = new ExcelHandler();
 
                     stopWatch = new Stopwatch();
                     stopWatch.Start();
@@ -75,7 +89,7 @@ namespace ExcelAutomation.Formularios
                 finally
                 {
                     lblArqLidos.Text = $"Arquivos lidos: \n{__qtdArquivosLidos}";
-                    __excelHelper.Dispose();
+                    __excelHandler.Dispose();
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
@@ -88,7 +102,7 @@ namespace ExcelAutomation.Formularios
 
         private async Task Read(string filePath)
         {
-            __excelHelper.ReadFile(filePath);
+            __excelHandler.ReadFile(filePath);
 
             await Fill();
             pgbImportacao.Value++;
@@ -98,12 +112,12 @@ namespace ExcelAutomation.Formularios
         {
             var people = new People();
 
-            var matricula = __excelHelper.GetMatricula();
-            var nome = __excelHelper.GetNome();
-            var cpf = __excelHelper.GetCpf();
-            var cargo = __excelHelper.GetCargo();
-            var valorCorrigido = __excelHelper.GetValorCorrigido();
-            var totalDevido = __excelHelper.GetTotalDevido();
+            var matricula = __excelHandler.GetMatricula();
+            var nome = __excelHandler.GetNome();
+            var cpf = __excelHandler.GetCpf();
+            var cargo = __excelHandler.GetCargo();
+            var valorCorrigido = __excelHandler.GetValorCorrigido();
+            var totalDevido = __excelHandler.GetTotalDevido();
 
             people.Create(matricula: matricula,
                         nome: nome,
@@ -174,7 +188,7 @@ namespace ExcelAutomation.Formularios
         {
             if (File.Exists(filePath))
             {
-                filePath = Path.Combine(Path.GetDirectoryName(filePath),
+                filePath = Path.Combine(Path.GetDirectoryName(filePath)!,
                     $"{Path.GetFileNameWithoutExtension(filePath)}_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
             }
 
@@ -207,6 +221,7 @@ namespace ExcelAutomation.Formularios
             lblArqLidos.Visible = false;
             __qtdArquivosLidos = 0;
             __qtdArquivosSelecionados = 0;
+            __excelHandler.Dispose();
         }
     }
 }

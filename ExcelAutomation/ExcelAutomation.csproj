@@ -37,8 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExcelAutomation.Application\ExcelAutomation.UseCases.csproj" />
     <ProjectReference Include="..\ExcelAutomation.Domain\ExcelAutomation.Domain.csproj" />
+    <ProjectReference Include="..\ExcelAutomation.UseCases\ExcelAutomation.UseCases.csproj" />
   </ItemGroup>
 
   <ItemGroup>

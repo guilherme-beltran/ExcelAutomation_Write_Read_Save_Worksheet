@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAutomation.Shared", "E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAutomation", "ExcelAutomation\ExcelAutomation.csproj", "{2DB39581-CB5E-471F-B58F-3BA908FB00A2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelAutomation.UseCases", "ExcelAutomation.UseCases\ExcelAutomation.UseCases.csproj", "{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAutomation.UseCases", "ExcelAutomation.UseCases\ExcelAutomation.UseCases.csproj", "{EB0A9171-63C7-4D3A-8F2B-BB9A648EDB3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{2DB39581-CB5E-471F-B58F-3BA908FB00A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DB39581-CB5E-471F-B58F-3BA908FB00A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DB39581-CB5E-471F-B58F-3BA908FB00A2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D4BC2B3A-17E1-4F44-B358-FCD6D61CAD14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB0A9171-63C7-4D3A-8F2B-BB9A648EDB3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB0A9171-63C7-4D3A-8F2B-BB9A648EDB3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB0A9171-63C7-4D3A-8F2B-BB9A648EDB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB0A9171-63C7-4D3A-8F2B-BB9A648EDB3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
