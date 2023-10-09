@@ -1,11 +1,10 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using ExcelAutomation.Domain.Models;
+﻿using ExcelAutomation.Domain.Models;
 using ExcelAutomation.Layouts;
-using ExcelAutomation.UseCases.DadosArquivos;
 using ExcelAutomation.UseCases.Helpers;
 using MaterialSkin.Controls;
+using MiniExcelLibs;
 using System.Data;
-using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace ExcelAutomation.Formularios
 {
@@ -16,12 +15,12 @@ namespace ExcelAutomation.Formularios
         private readonly int[] larguraColunas = { 150, 200, 100, 150, 200, 150 };
         private int __qtdArquivosLidos;
         private int __qtdArquivosSelecionados;
-        private DataTable __planilhaValoresPagoAdm;
-        private DataTable __planilhaCalculos;
+        private ExcelHelper __excelHelper;
+
+        private Stopwatch stopWatch;
         public FrmDataReader()
         {
             InitializeComponent();
-            lblProgressoLeitura.Visible = false;
             pgbImportacao.Visible = false;
         }
 
@@ -33,32 +32,39 @@ namespace ExcelAutomation.Formularios
                 Filter = "Arquivos Excel (*.xls;*.xlsx)|*.xls;*.xlsx|Todos os arquivos (*.*)|*.*"
             };
 
+            lblAguardando.Visible = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 __qtdArquivosSelecionados = openFileDialog.FileNames.Length;
                 pgbImportacao.Maximum = __qtdArquivosSelecionados;
-                label3.Visible = false;
-                lblArqLidos.Visible = false;
-                lblProgressoLeitura.Visible = true;
+                pgbImportacao.Value = 0;
                 pgbImportacao.Visible = true;
+                lblArqLidos.Visible = false;
 
                 try
                 {
                     btnImportar.Enabled = false;
+
+                    __excelHelper = new ExcelHelper();
+
+                    stopWatch = new Stopwatch();
+                    stopWatch.Start();
 
                     foreach (string filePath in openFileDialog.FileNames)
                     {
                         await Read(filePath);
                     }
 
-                    lblProgressoLeitura.Visible = false;
+
                     pgbImportacao.Visible = false;
-                    label3.Visible = true;
+                    lblAguardando.Visible = false;
+
                     lblArqLidos.Visible = true;
                     btnImportar.Enabled = true;
 
-                    pgbImportacao.Value = 0;
-                    pgbImportacao.Maximum = __qtdArquivosSelecionados;
+                    lblAguardando.Visible = false;
+                    btnExportar.Visible = true;
+                    btnLimpar.Visible = true;
 
                 }
                 catch (Exception ex)
@@ -66,67 +72,54 @@ namespace ExcelAutomation.Formularios
                     MessageBox.Show($"Ocorreu um falha ao executar a ação. Detalhe: {ex.Message}");
                     btnImportar.Enabled = true;
                 }
+                finally
+                {
+                    lblArqLidos.Text = $"Arquivos lidos: \n{__qtdArquivosLidos}";
+                    __excelHelper.Dispose();
+
+                    stopWatch.Stop();
+                    TimeSpan ts = stopWatch.Elapsed;
+                    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                    MessageBox.Show($"Tempo total: {elapsedTime}");
+                }
             }
+            lblAguardando.Visible = false;
         }
 
         private async Task Read(string filePath)
         {
-            var dataSet = ExcelHelper.ReadExcelFile(filePath);
-
-            __planilhaValoresPagoAdm = dataSet.Tables[0];
-            __planilhaCalculos = dataSet.Tables[1];
+            __excelHelper.ReadFile(filePath);
 
             await Fill();
-            __qtdArquivosLidos++;
             pgbImportacao.Value++;
-            lblArqLidos.Text = __qtdArquivosLidos.ToString();
-
-            // Certifique-se de que o valor da ProgressBar está dentro do intervalo permitido
-            if (__qtdArquivosLidos >= pgbImportacao.Minimum && __qtdArquivosLidos <= pgbImportacao.Maximum)
-            {
-                pgbImportacao.Value = __qtdArquivosLidos;
-            }
-            else
-            {
-                // Se estiver fora do intervalo, ajuste-o para o valor máximo ou mínimo
-                pgbImportacao.Value = 0;
-                pgbImportacao.Maximum = __qtdArquivosSelecionados;
-            }
         }
 
         private async Task Fill()
         {
-            if (__planilhaValoresPagoAdm.Rows.Count == 0 || __planilhaCalculos.Rows.Count == 0)
-            {
-                return;
-            }
+            var people = new People();
 
-            var dadosHandler = new DadosHandler(__planilhaValoresPagoAdm);
-            for (int i = 0; i < __planilhaValoresPagoAdm.Rows.Count; i++)
-            {
-                var people = new People();
+            var matricula = __excelHelper.GetMatricula();
+            var nome = __excelHelper.GetNome();
+            var cpf = __excelHelper.GetCpf();
+            var cargo = __excelHelper.GetCargo();
+            var valorCorrigido = __excelHelper.GetValorCorrigido();
+            var totalDevido = __excelHelper.GetTotalDevido();
 
-                var matricula = dadosHandler.ObterMatricula();
-                var nome = dadosHandler.ObterNome();
-                var cpf = dadosHandler.ObterCpf();
-                var cargo = dadosHandler.ObterCargo();
-                var valorCorrigido = people.SomarValorCorrigido(__planilhaValoresPagoAdm);
-                var totalDevido = people.ObterTotalDevido(__planilhaCalculos);
+            people.Create(matricula: matricula,
+                        nome: nome,
+                        cpf: cpf,
+                        cargo: cargo,
+                        valorCorrigido: valorCorrigido,
+                        totalPagoAdministrativo: totalDevido);
 
-                people.Criar(matricula: matricula,
-                            nome: nome,
-                            cpf: cpf,
-                            cargo: cargo,
-                            valorCorrigido: valorCorrigido,
-                            totalPagoAdministrativo: totalDevido);
+            dtgDados.Rows.Add(people.Matricula,
+                              people.Nome,
+                              people.Cpf,
+                              people.Cargo,
+                              people.ValorCorrigido,
+                              people.TotalPagoAdministrativo);
 
-                dtgDados.Rows.Add(people.Matricula,
-                                  people.Nome,
-                                  people.Cpf,
-                                  people.Cargo,
-                                  people.ValorCorrigido,
-                                  people.TotalPagoAdministrativo);
-            }
+            __qtdArquivosLidos++;
         }
 
 
@@ -157,5 +150,63 @@ namespace ExcelAutomation.Formularios
             CarregarLayoutDatagrid();
         }
 
+        private async void btnExportar_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Arquivos Excel (*.xls;*.xlsx)|*.xls;*.xlsx|Todos os arquivos (*.*)|*.*",
+                FileName = "Sem titulo.xlsx"
+            };
+
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                btnExportar.Enabled = false;
+                btnLimpar.Enabled = false;
+                string filePath = saveFileDialog.FileName;
+                await Export(filePath);
+                btnExportar.Enabled = true;
+                btnLimpar.Enabled = true;
+            }
+        }
+
+        private async Task Export(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                filePath = Path.Combine(Path.GetDirectoryName(filePath),
+                    $"{Path.GetFileNameWithoutExtension(filePath)}_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+            }
+
+            var values = new List<Dictionary<string, object>>();
+
+            foreach (DataGridViewRow row in dtgDados.Rows)
+            {
+                var rowData = new Dictionary<string, object>
+                {
+                    { "MATRÍCULA", row.Cells[0].Value },
+                    { "NOME", row.Cells[1].Value },
+                    { "CPF", row.Cells[2].Value },
+                    { "CARGO", row.Cells[3].Value },
+                    { "VALOR CORRIGIDO", row.Cells[4].Value },
+                    { "TOTAL DEVIDO", row.Cells[5].Value }
+                };
+
+                values.Add(rowData);
+            }
+
+            MiniExcel.SaveAs(filePath, values);
+            MessageBox.Show("Dados exportados para o Excel com sucesso!");
+        }
+
+        private void pbLimpar_Click(object sender, EventArgs e)
+        {
+            dtgDados.Rows.Clear();
+            btnLimpar.Visible = false;
+            btnExportar.Visible = false;
+            lblArqLidos.Visible = false;
+            __qtdArquivosLidos = 0;
+            __qtdArquivosSelecionados = 0;
+        }
     }
 }

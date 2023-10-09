@@ -28,7 +28,7 @@ namespace ExcelAutomation.Domain.Models
         public decimal ValorCorrigido { get; private set; }
         public decimal TotalPagoAdministrativo { get; private set; }
 
-        public void Criar(string matricula,
+        public void Create(string matricula,
                           string nome,
                           string cpf,
                           string cargo,
