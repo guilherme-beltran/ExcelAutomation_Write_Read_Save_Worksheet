@@ -5,12 +5,15 @@ using MaterialSkin.Controls;
 using MiniExcelLibs;
 using System.Data;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace ExcelAutomation.Formularios
 {
     public partial class FrmDataReader : MaterialForm
     {
-        private readonly string[] colunas = { "MATRÍCULA", "NOME", "CPF", "CARGO", "VALOR CORRIGIDO", "TOTAL DEVIDO" };
+        #region Variaveis e propriedades
+
+        private readonly string[] colunas = { "MATRÍCULA", "NOME", "CPF", "CARGO", "VALOR PAGO ADMINISTRATIVAMENTE ATÉ A DATA DO TRANSITO EM JULGADO CORRIGIDO ATÉ MAIO/2006", "VALOR DEVIDO AOS BENEFICIÁRIOS ATÉ MAIO/2006" };
         private readonly bool[] colVisivel = { true, true, true, true, true, true };
         private readonly int[] larguraColunas = { 150, 200, 100, 150, 200, 150 };
         private int __qtdArquivosLidos;
@@ -18,11 +21,29 @@ namespace ExcelAutomation.Formularios
         private ExcelHandler __excelHandler;
 
         private Stopwatch stopWatch;
+
+        #endregion
+
+        #region Construtor
+
         public FrmDataReader()
         {
             InitializeComponent();
             pgbImportacao.Visible = false;
         }
+
+        #endregion
+
+        #region Eventos
+
+        private void FrmDataReader_Load(object sender, EventArgs e)
+        {
+            CarregarLayoutDatagrid();
+        }
+
+        #endregion
+
+        #region Botões
 
         private async void btnImportar_Click(object sender, EventArgs e)
         {
@@ -35,107 +56,205 @@ namespace ExcelAutomation.Formularios
             lblAguardando.Visible = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                if (!openFileDialog.FileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase) || !openFileDialog.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+
+                if (!ValidarArquivosSelecionados(openFileDialog))
                 {
-                    MessageBox.Show($"Tipo de arquivo inválido. Selecione apenas arquivos .xls ou .xlsx");
-                    lblAguardando.Visible = false;
                     return;
                 }
 
-                if (openFileDialog.FileNames.Length > 12000)
-                {
-                    MessageBox.Show($"Não é possível selecionar mais do que 12000 arquivos");
-                    lblAguardando.Visible = false;
-                    return;
-                }
-
-                __qtdArquivosSelecionados = openFileDialog.FileNames.Length;
-                pgbImportacao.Maximum = __qtdArquivosSelecionados;
-                pgbImportacao.Value = 0;
-                pgbImportacao.Visible = true;
-                lblArqLidos.Visible = false;
+                ConfigurarProgressBar();
 
                 try
                 {
-                    btnImportar.Enabled = false;
+                    await ProcessarArquivosSelecionados(openFileDialog);
 
-                    __excelHandler = new ExcelHandler();
-
-                    stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    foreach (string filePath in openFileDialog.FileNames)
-                    {
-                        await Read(filePath);
-                    }
-
-
-                    pgbImportacao.Visible = false;
-                    lblAguardando.Visible = false;
-
-                    lblArqLidos.Visible = true;
-                    btnImportar.Enabled = true;
-
-                    lblAguardando.Visible = false;
-                    btnExportar.Visible = true;
-                    btnLimpar.Visible = true;
+                    ExibirMensagemDeSucesso();
 
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ocorreu um falha ao executar a ação. Detalhe: {ex.Message}");
-                    btnImportar.Enabled = true;
+                    ExibirMensagemErro(ex);
                 }
                 finally
                 {
-                    lblArqLidos.Text = $"Arquivos lidos: \n{__qtdArquivosLidos}";
-                    __excelHandler.Dispose();
+                    FinalizarProcessamento();
+                }
 
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                    MessageBox.Show($"Tempo total: {elapsedTime}");
+            }
+
+        }
+        private async void btnExportar_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Arquivos Excel (*.xls;*.xlsx)|*.xls;*.xlsx|Todos os arquivos (*.*)|*.*",
+                FileName = "Sem titulo.xlsx"
+            };
+
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                btnExportar.Enabled = false;
+                btnLimpar.Enabled = false;
+                string filePath = saveFileDialog.FileName;
+
+                await Export(filePath);
+
+                btnExportar.Enabled = true;
+                btnLimpar.Enabled = true;
+            }
+        }
+        private void pbLimpar_Click(object sender, EventArgs e)
+        {
+            dtgDados.Rows.Clear();
+            btnLimpar.Visible = false;
+            btnExportar.Visible = false;
+            lblArqLidos.Visible = false;
+            __qtdArquivosLidos = 0;
+            __qtdArquivosSelecionados = 0;
+            __excelHandler.Dispose();
+        }
+
+
+        #endregion
+
+        #region Métodos
+
+        private bool ValidarArquivosSelecionados(OpenFileDialog openFileDialog)
+        {
+            if (openFileDialog.FileNames.Length > 13000)
+            {
+                MessageBox.Show($"Não é possível selecionar mais do que 13000 arquivos");
+                lblAguardando.Visible = false;
+                return false;
+            }
+
+            if (!ValidarExtensao(openFileDialog.FileNames))
+            {
+                lblAguardando.Visible = false;
+                return false;
+            }
+            __qtdArquivosSelecionados = openFileDialog.FileNames.Length;
+            return true;
+        }
+
+        private void ConfigurarProgressBar()
+        {
+            pgbImportacao.Maximum = __qtdArquivosSelecionados;
+            pgbImportacao.Value = 0;
+            pgbImportacao.Visible = true;
+            lblArqLidos.Visible = false;
+        }
+
+        private void ExibirMensagemDeSucesso()
+        {
+            pgbImportacao.Visible = false;
+            lblAguardando.Visible = false;
+            lblArqLidos.Visible = true;
+            btnImportar.Enabled = true;
+            lblArqLidos.Text = $"Arquivos lidos: \n{__qtdArquivosLidos}";
+            ExibirTempoTotalCarregamento();
+            ExibirBotaoExportarELimpar();
+        }
+
+        private async Task ProcessarArquivosSelecionados(OpenFileDialog openFileDialog)
+        {
+            btnImportar.Enabled = false;
+            __excelHandler = new ExcelHandler();
+            stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            foreach (string filePath in openFileDialog.FileNames)
+            {
+                await Read(filePath);
+            }
+
+            openFileDialog.Dispose();
+        }
+
+        private void FinalizarProcessamento()
+        {
+            __excelHandler.Dispose();
+            lblAguardando.Visible = false;
+        }
+
+        private void ExibirMensagemErro(Exception ex)
+        {
+            MessageBox.Show($"Ocorreu um falha ao executar a ação. Detalhe: {ex.Message}");
+            btnImportar.Enabled = true;
+        }
+
+        private void ExibirBotaoExportarELimpar()
+        {
+            btnExportar.Visible = true;
+            btnLimpar.Visible = true;
+        }
+
+        private void ExibirTempoTotalCarregamento()
+        {
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            MessageBox.Show($"Tempo total: {elapsedTime}");
+        }
+
+        private bool ValidarExtensao(string[] fileNames)
+        {
+            foreach (var filePath in fileNames)
+            {
+                string extensao = Path.GetExtension(filePath).ToLower();
+                if (extensao != ".xls" && extensao != ".xlsx")
+                {
+                    MessageBox.Show($"Arquivo inválido: {filePath}. Por favor, selecione apenas arquivos com extensão .xls ou .xlsx.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
                 }
             }
-            lblAguardando.Visible = false;
+            return true;
         }
 
         private async Task Read(string filePath)
         {
-            __excelHandler.ReadFile(filePath);
+            await Task.Run(() =>
+            {
+                __excelHandler.ReadFile(filePath);
+            });
 
             await Fill();
+            AtualizarProgressBar();
+        }
+
+        private void AtualizarProgressBar()
+        {
             pgbImportacao.Value++;
         }
 
         private async Task Fill()
         {
-            var people = new People();
+            var beneficiario = new Beneficiario();
 
-            var matricula = __excelHandler.GetMatricula();
-            var nome = __excelHandler.GetNome();
-            var cpf = __excelHandler.GetCpf();
-            var cargo = __excelHandler.GetCargo();
-            var valorCorrigido = __excelHandler.GetValorCorrigido();
-            var totalDevido = __excelHandler.GetTotalDevido();
+            var matricula = __excelHandler.Matricula;
+            var nome = __excelHandler.Nome;
+            var cpf = __excelHandler.Cpf;
+            var cargo = __excelHandler.Cargo;
+            var valorCorrigido = __excelHandler.ValorCorrigido;
+            var totalDevido = __excelHandler.TotalDevido;
 
-            people.Create(matricula: matricula,
+            beneficiario.Create(matricula: matricula,
                         nome: nome,
                         cpf: cpf,
                         cargo: cargo,
                         valorCorrigido: valorCorrigido,
                         totalPagoAdministrativo: totalDevido);
 
-            dtgDados.Rows.Add(people.Matricula,
-                              people.Nome,
-                              people.Cpf,
-                              people.Cargo,
-                              people.ValorCorrigido,
-                              people.TotalPagoAdministrativo);
+            dtgDados.Rows.Add(beneficiario.Matricula,
+                              beneficiario.Nome,
+                              beneficiario.Cpf,
+                              beneficiario.Cargo,
+                              beneficiario.ValorCorrigido,
+                              beneficiario.TotalPagoAdministrativo);
 
             __qtdArquivosLidos++;
         }
-
 
         private void CarregarLayoutDatagrid()
         {
@@ -159,31 +278,6 @@ namespace ExcelAutomation.Formularios
 
         }
 
-        private void FrmDataReader_Load(object sender, EventArgs e)
-        {
-            CarregarLayoutDatagrid();
-        }
-
-        private async void btnExportar_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Arquivos Excel (*.xls;*.xlsx)|*.xls;*.xlsx|Todos os arquivos (*.*)|*.*",
-                FileName = "Sem titulo.xlsx"
-            };
-
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                btnExportar.Enabled = false;
-                btnLimpar.Enabled = false;
-                string filePath = saveFileDialog.FileName;
-                await Export(filePath);
-                btnExportar.Enabled = true;
-                btnLimpar.Enabled = true;
-            }
-        }
-
         private async Task Export(string filePath)
         {
             if (File.Exists(filePath))
@@ -198,12 +292,12 @@ namespace ExcelAutomation.Formularios
             {
                 var rowData = new Dictionary<string, object>
                 {
-                    { "MATRÍCULA", row.Cells[0].Value },
-                    { "NOME", row.Cells[1].Value },
-                    { "CPF", row.Cells[2].Value },
-                    { "CARGO", row.Cells[3].Value },
-                    { "VALOR CORRIGIDO", row.Cells[4].Value },
-                    { "TOTAL DEVIDO", row.Cells[5].Value }
+                    { colunas[0], row.Cells[0].Value },
+                    { colunas[1], row.Cells[1].Value },
+                    { colunas[2], row.Cells[2].Value },
+                    { colunas[3], row.Cells[3].Value },
+                    { colunas[4], row.Cells[4].Value },
+                    { colunas[5], row.Cells[5].Value }
                 };
 
                 values.Add(rowData);
@@ -213,15 +307,10 @@ namespace ExcelAutomation.Formularios
             MessageBox.Show("Dados exportados para o Excel com sucesso!");
         }
 
-        private void pbLimpar_Click(object sender, EventArgs e)
-        {
-            dtgDados.Rows.Clear();
-            btnLimpar.Visible = false;
-            btnExportar.Visible = false;
-            lblArqLidos.Visible = false;
-            __qtdArquivosLidos = 0;
-            __qtdArquivosSelecionados = 0;
-            __excelHandler.Dispose();
-        }
+        #endregion
+
+
+
+
     }
 }

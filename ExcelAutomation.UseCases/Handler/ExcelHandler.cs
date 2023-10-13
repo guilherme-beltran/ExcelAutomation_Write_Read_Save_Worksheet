@@ -53,50 +53,44 @@ namespace ExcelAutomation.UseCases.Handler
                 } while (reader.NextResult());
             }
 
-            Matricula = matrizValorPagoAdm[0][2];
-            Nome = matrizValorPagoAdm[1][2];
-            Cpf = matrizValorPagoAdm[2][2];
-            Cargo = matrizValorPagoAdm[3][2];
-            ValorCorrigido = CalcularValorCorrigidoAteAgosto2004(matrizValorPagoAdm);
-            TotalDevido = Convert.ToDecimal(matrizPlanilhaCalculos[85][8]);
+            Matricula = GetMatricula(matrizValorPagoAdm[0][2]);
+            Nome = GetNome(matrizValorPagoAdm[1][2]);
+            Cpf = GetCpf(matrizValorPagoAdm[2][2]);
+            Cargo = GetCargo(matrizValorPagoAdm[3][2]);
+            ValorCorrigido = CalcularValorCorrigidoAteAgosto2004_ValorPagoAdm(matrizValorPagoAdm);
+            TotalDevido = CalcularValorCorrigidoAteMaio2001(matrizPlanilhaCalculos);
         }
 
-        public string GetMatricula()
+        public string GetMatricula(string matricula)
         {
-            var matriculaLimpa = Matricula.Trim();
+            var matriculaLimpa = matricula.Trim();
             return new string(matriculaLimpa.Where(char.IsDigit).ToArray());
         }
 
-        public string GetNome()
+        public string GetNome(string nome)
         {
-            var nomeOriginal = Nome.Trim();
+            var nomeOriginal = nome.Trim();
             var prefixo = "Nome";
             return nomeOriginal.Substring(prefixo.Length).Trim();
         }
 
-        public string GetCpf()
+        public string GetCpf(string cpf)
         {
-            var cpf = Cpf.Trim();
+            cpf = cpf.Trim();
             var textoLimpo = cpf!.Trim();
 
             return new string(textoLimpo.Where(char.IsDigit).ToArray());
         }
 
-        public string GetCargo()
+        public string GetCargo(string cargo)
         {
-            var cargoOriginal = Cargo.Trim();
+            var cargoOriginal = cargo.Trim();
             var prefixo = "Cargo";
 
             return cargoOriginal.Substring(prefixo.Length).Trim();
         }
 
-        public decimal GetValorCorrigido()
-            => ValorCorrigido;
-
-        public decimal GetTotalDevido()
-            => TotalDevido;
-
-        public decimal CalcularValorCorrigidoAteAgosto2004(List<List<string>> matriz)
+        public decimal CalcularValorCorrigidoAteAgosto2004_ValorPagoAdm(List<List<string>> matriz)
         {
             decimal valorCorrigido = 0;
 
@@ -120,6 +114,112 @@ namespace ExcelAutomation.UseCases.Handler
             return valorCorrigido;
         }
 
+        //public decimal CalcularValorCorrigidoAteMaio2001(List<List<string>> matriz)
+        //{
+        //    decimal valorCorrigido = 0;
+
+        //    for (int row = 7; row < matriz.Count; row++)
+        //    {
+
+        //        var ano = Convert.ToInt32(matriz[row][2]);
+        //        var mes = Convert.ToInt32(matriz[row][3]);
+        //        var valor = Convert.ToDecimal(matriz[row][8]);
+
+        //        if ((ano < 2001) || (ano == 2001 && mes <= 5))
+        //        {
+        //            valorCorrigido += valor;
+        //        }
+        //        else
+        //        {
+        //            break;
+        //        }
+        //    }
+
+        //    return valorCorrigido;
+        //}
+
+        public decimal CalcularValorCorrigidoAteMaio2001_PlanilhaCalculo(List<List<string>> matriz)
+        {
+            decimal valorCorrigido = 0;
+            bool pularDuasLinhas = false;
+
+            for (int row = 7; row < matriz.Count; row++)
+            {
+                var anoString = matriz[row][2];
+                var mesString = matriz[row][3];
+                var valorString = matriz[row][8];
+
+                // Verificar se as células contêm valores válidos
+                if (int.TryParse(anoString, out int ano) && int.TryParse(mesString, out int mes) && decimal.TryParse(valorString, out decimal valor))
+                {
+                    // Verificar a condição do ano e do mês
+                    if ((ano < 2001) || (ano == 2001 && mes <= 5))
+                    {
+                        if (!pularDuasLinhas)
+                        {
+                            valorCorrigido += valor;
+                        }
+                    }
+                    else
+                    {
+                        // Se encontrar um novo ano, pule duas linhas
+                        pularDuasLinhas = true;
+                    }
+                }
+                else
+                {
+                    // Se não puder converter para números válidos, pule duas linhas
+                    pularDuasLinhas = true;
+                }
+            }
+
+            return valorCorrigido;
+        }
+
+        public decimal CalcularValorCorrigidoAteMaio2001(List<List<string>> matriz)
+        {
+            decimal valorCorrigido = 0;
+            bool pularDuasLinhas = false;
+
+            for (int row = 7; row < matriz.Count; row++)
+            {
+                var anoString = matriz[row][2];
+                var mesString = matriz[row][3];
+                var valorString = matriz[row][8];
+
+                // Verificar se as células contêm valores válidos
+                if (!string.IsNullOrWhiteSpace(anoString) && !string.IsNullOrWhiteSpace(mesString) && !string.IsNullOrWhiteSpace(valorString))
+                {
+                    // Converter as strings para int e decimal fora do if
+                    int ano = int.Parse(anoString);
+                    int mes = int.Parse(mesString);
+                    decimal valor = decimal.Parse(valorString);
+
+                    // Verificar a condição do ano e do mês
+                    if (ano < 2001 || (ano == 2001 && mes <= 5))
+                    {
+                        if (!pularDuasLinhas)
+                        {
+                            valorCorrigido += valor;
+                        }
+                    }
+                    else
+                    {
+                        // Se encontrar um novo ano, pule duas linhas
+                        pularDuasLinhas = true;
+                    }
+                }
+                else
+                {
+                    // Se uma das células estiver vazia, pule duas linhas
+                    pularDuasLinhas = true;
+                }
+            }
+
+            return valorCorrigido;
+        }
+
+
         private void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -134,13 +234,6 @@ namespace ExcelAutomation.UseCases.Handler
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~ExcelHelper()
-        // {
-        //     // Não altere este código. Coloque o código de limpeza no método 'Dispose(bool disposing)'
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

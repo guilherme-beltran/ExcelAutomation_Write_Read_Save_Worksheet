@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmDataReader));
             btnImportar = new MaterialSkin.Controls.MaterialButton();
             btnExportar = new MaterialSkin.Controls.MaterialButton();
             pgbImportacao = new MaterialSkin.Controls.MaterialProgressBar();
@@ -174,6 +175,7 @@
             Controls.Add(lblArqLidos);
             Controls.Add(panelDados);
             FormStyle = FormStyles.ActionBar_None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MaximumSize = new Size(1007, 521);
             MinimumSize = new Size(1007, 521);
@@ -181,7 +183,7 @@
             Padding = new Padding(3, 24, 3, 3);
             Sizable = false;
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "FrmDataReader";
+            Text = "Excel Automation";
             Load += FrmDataReader_Load;
             panelDados.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dtgDados).EndInit();
