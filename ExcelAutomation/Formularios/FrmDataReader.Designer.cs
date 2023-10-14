@@ -49,7 +49,7 @@
             btnImportar.Depth = 0;
             btnImportar.HighEmphasis = true;
             btnImportar.Icon = null;
-            btnImportar.Location = new Point(12, 35);
+            btnImportar.Location = new Point(19, 42);
             btnImportar.Margin = new Padding(4, 6, 4, 6);
             btnImportar.MouseState = MaterialSkin.MouseState.HOVER;
             btnImportar.Name = "btnImportar";
@@ -64,14 +64,14 @@
             // 
             // btnExportar
             // 
-            btnExportar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnExportar.Anchor = AnchorStyles.Bottom;
             btnExportar.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             btnExportar.Cursor = Cursors.Hand;
             btnExportar.Density = MaterialSkin.Controls.MaterialButton.MaterialButtonDensity.Default;
             btnExportar.Depth = 0;
             btnExportar.HighEmphasis = true;
             btnExportar.Icon = null;
-            btnExportar.Location = new Point(506, 428);
+            btnExportar.Location = new Point(506, 617);
             btnExportar.Margin = new Padding(4, 6, 4, 6);
             btnExportar.MouseState = MaterialSkin.MouseState.HOVER;
             btnExportar.Name = "btnExportar";
@@ -87,8 +87,9 @@
             // 
             // pgbImportacao
             // 
+            pgbImportacao.Anchor = AnchorStyles.Bottom;
             pgbImportacao.Depth = 0;
-            pgbImportacao.Location = new Point(15, 452);
+            pgbImportacao.Location = new Point(15, 641);
             pgbImportacao.MouseState = MaterialSkin.MouseState.HOVER;
             pgbImportacao.Name = "pgbImportacao";
             pgbImportacao.Size = new Size(310, 5);
@@ -98,9 +99,10 @@
             // 
             // lblArqLidos
             // 
+            lblArqLidos.Anchor = AnchorStyles.Bottom;
             lblArqLidos.AutoSize = true;
             lblArqLidos.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            lblArqLidos.Location = new Point(831, 434);
+            lblArqLidos.Location = new Point(831, 623);
             lblArqLidos.Name = "lblArqLidos";
             lblArqLidos.Size = new Size(125, 21);
             lblArqLidos.TabIndex = 20;
@@ -113,7 +115,7 @@
             panelDados.Controls.Add(dtgDados);
             panelDados.Location = new Point(19, 99);
             panelDados.Name = "panelDados";
-            panelDados.Size = new Size(962, 295);
+            panelDados.Size = new Size(962, 476);
             panelDados.TabIndex = 16;
             // 
             // dtgDados
@@ -123,15 +125,16 @@
             dtgDados.Location = new Point(0, 0);
             dtgDados.Name = "dtgDados";
             dtgDados.RowTemplate.Height = 25;
-            dtgDados.Size = new Size(962, 295);
+            dtgDados.Size = new Size(962, 476);
             dtgDados.TabIndex = 0;
             // 
             // lblAguardando
             // 
+            lblAguardando.Anchor = AnchorStyles.Bottom;
             lblAguardando.AutoSize = true;
             lblAguardando.Depth = 0;
             lblAguardando.Font = new Font("Roboto", 14F, FontStyle.Regular, GraphicsUnit.Pixel);
-            lblAguardando.Location = new Point(15, 427);
+            lblAguardando.Location = new Point(15, 616);
             lblAguardando.MouseState = MaterialSkin.MouseState.HOVER;
             lblAguardando.Name = "lblAguardando";
             lblAguardando.Size = new Size(281, 19);
@@ -141,6 +144,7 @@
             // 
             // btnLimpar
             // 
+            btnLimpar.Anchor = AnchorStyles.Bottom;
             btnLimpar.AutoSize = false;
             btnLimpar.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             btnLimpar.Cursor = Cursors.Hand;
@@ -148,7 +152,7 @@
             btnLimpar.Depth = 0;
             btnLimpar.HighEmphasis = true;
             btnLimpar.Icon = null;
-            btnLimpar.Location = new Point(403, 428);
+            btnLimpar.Location = new Point(403, 617);
             btnLimpar.Margin = new Padding(4, 6, 4, 6);
             btnLimpar.MouseState = MaterialSkin.MouseState.HOVER;
             btnLimpar.Name = "btnLimpar";
@@ -166,7 +170,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1007, 521);
+            ClientSize = new Size(1007, 714);
             Controls.Add(btnLimpar);
             Controls.Add(lblAguardando);
             Controls.Add(btnImportar);
@@ -177,7 +181,6 @@
             FormStyle = FormStyles.ActionBar_None;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
-            MaximumSize = new Size(1007, 521);
             MinimumSize = new Size(1007, 521);
             Name = "FrmDataReader";
             Padding = new Padding(3, 24, 3, 3);

@@ -3,6 +3,7 @@ using ExcelAutomation.Layouts;
 using ExcelAutomation.UseCases.Handler;
 using MaterialSkin.Controls;
 using MiniExcelLibs;
+using Notificacao;
 using System.Data;
 using System.Diagnostics;
 using System.Windows.Forms;
@@ -124,7 +125,11 @@ namespace ExcelAutomation.Formularios
         {
             if (openFileDialog.FileNames.Length > 13000)
             {
-                MessageBox.Show($"Não é possível selecionar mais do que 13000 arquivos");
+                LayoutNotificacao.AbrirAlerta(backColor: Color.LightGoldenrodYellow,
+                                              linhaAlertaColor: Color.Goldenrod,
+                                              titulo: "Atenção",
+                                              texto: "Não é possível selecionar mais do que 13000 arquivos",
+                                              icone: Properties.Resources.aviso);
                 lblAguardando.Visible = false;
                 return false;
             }
@@ -153,8 +158,12 @@ namespace ExcelAutomation.Formularios
             lblArqLidos.Visible = true;
             btnImportar.Enabled = true;
             lblArqLidos.Text = $"Arquivos lidos: \n{__qtdArquivosLidos}";
-            ExibirTempoTotalCarregamento();
             ExibirBotaoExportarELimpar();
+            LayoutNotificacao.AbrirAlerta(backColor: Color.LightGreen,
+                                              linhaAlertaColor: Color.SeaGreen,
+                                              titulo: "Sucesso",
+                                              texto: "Dados importados com sucesso.",
+                                              icone: Properties.Resources.sucesso);
         }
 
         private async Task ProcessarArquivosSelecionados(OpenFileDialog openFileDialog)
@@ -180,7 +189,7 @@ namespace ExcelAutomation.Formularios
 
         private void ExibirMensagemErro(Exception ex)
         {
-            MessageBox.Show($"Ocorreu um falha ao executar a ação. Detalhe: {ex.Message}");
+            MessageBox.Show($"Ocorreu um falha ao executar a ação. Detalhe: {ex.Message}", "Falha", MessageBoxButtons.OK, MessageBoxIcon.Error);
             btnImportar.Enabled = true;
         }
 
@@ -205,7 +214,11 @@ namespace ExcelAutomation.Formularios
                 string extensao = Path.GetExtension(filePath).ToLower();
                 if (extensao != ".xls" && extensao != ".xlsx")
                 {
-                    MessageBox.Show($"Arquivo inválido: {filePath}. Por favor, selecione apenas arquivos com extensão .xls ou .xlsx.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LayoutNotificacao.AbrirAlerta(backColor: Color.LightGoldenrodYellow,
+                                              linhaAlertaColor: Color.Goldenrod,
+                                              titulo: "Atenção",
+                                              texto: $"Por favor, selecione apenas arquivos com extensão .xls ou .xlsx. \n\nArquivo inválido: {filePath}. ",
+                                              icone: Properties.Resources.aviso);
                     return false;
                 }
             }
@@ -304,13 +317,14 @@ namespace ExcelAutomation.Formularios
             }
 
             MiniExcel.SaveAs(filePath, values);
-            MessageBox.Show("Dados exportados para o Excel com sucesso!");
+
+            LayoutNotificacao.AbrirAlerta(backColor: Color.LightGreen, 
+                        linhaAlertaColor: Color.SeaGreen, 
+                        titulo: "Sucesso", 
+                        texto: "Dados exportados com sucesso!", 
+                        icone: Properties.Resources.sucesso);
         }
 
         #endregion
-
-
-
-
     }
 }

@@ -47,6 +47,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Notificacao">
+      <HintPath>..\..\..\Notificacao\Notificacao\bin\Debug\net6.0-windows\Notificacao.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Formularios\FrmDataReader.cs">
       <SubType>Form</SubType>
     </Compile>
